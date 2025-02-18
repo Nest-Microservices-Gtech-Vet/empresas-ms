@@ -6,7 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { envs } from 'src/config/envs';
 import { USERS_SERVICE } from 'src/config/services';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'prisma/prisma.service';
+
 
 @Module({
   imports: [
@@ -18,16 +18,16 @@ import { PrismaService } from 'prisma/prisma.service';
     ClientsModule.register([
       {
         name: USERS_SERVICE,
-          transport: Transport.TCP,
-          options: {
-            host: envs.usersMicroserviceHost,
-            port: Number(envs.usersMicroservicePort) || 3001,
-          },
+        transport: Transport.TCP,
+        options: {
+          host: envs.usersMicroserviceHost,
+          port: envs.usersMicroservicePort,
+        },
       },
     ]),
   ],
   controllers: [EmpresasController],
-  providers: [EmpresasService,PrismaService],
-  exports: [EmpresasService,PrismaService],
+  providers: [EmpresasService,],
+
 })
-export class EmpresasModule {}
+export class EmpresasModule { }

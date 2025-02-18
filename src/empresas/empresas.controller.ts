@@ -6,7 +6,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 
-@Controller('empresas')
+@Controller()
 export class EmpresasController {
   constructor(private readonly empresasService: EmpresasService) { }
 

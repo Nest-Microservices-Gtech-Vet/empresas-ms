@@ -4,7 +4,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { PrismaService } from 'prisma/prisma.service';
+
 import { JwtStrategy } from './jwt.strategy';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USERS_SERVICE } from 'src/config/services';
@@ -31,8 +31,8 @@ import { USERS_SERVICE } from 'src/config/services';
           const host = configService.get<string>('USERS_MICROSERVICE_HOST');
           const port = configService.get<number>('USERS_MICROSERVICE_PORT');
 
-          console.log(`🛠 Conectando a Usuarios-MS en: ${host}:${port}`);
-          console.log('🔍 Conectando a Usuarios-MS en:', configService.get<string>('USERS_MICROSERVICE_HOST'), configService.get<number>('USERS_MICROSERVICE_PORT'));
+          console.log(`🛠 Conectando a Usuarios-MS desde auth module en: ${host}:${port}`);
+          console.log('🔍 Conectando a Usuarios-MS desde auth module en:', configService.get<string>('USERS_MICROSERVICE_HOST'), configService.get<number>('USERS_MICROSERVICE_PORT'));
 
           return {
             transport: Transport.TCP,
@@ -43,7 +43,7 @@ import { USERS_SERVICE } from 'src/config/services';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy],
+  providers: [AuthService, JwtStrategy],
   exports: [AuthService, JwtStrategy],
 })
 export class AuthModule { }

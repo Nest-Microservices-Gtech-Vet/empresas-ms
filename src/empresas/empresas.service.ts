@@ -6,7 +6,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { USERS_SERVICE } from 'src/config/services';
 import { envs } from 'src/config/envs';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'prisma/prisma.service';
+
 
 @Injectable()
 export class EmpresasService extends PrismaClient implements OnModuleInit {
@@ -15,15 +15,14 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   constructor(
     @Inject(USERS_SERVICE) private readonly userClient: ClientProxy,
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
   ) {
     super();
 
     setTimeout(() => {
       console.log('🔍 Probando conexión a usuarios-ms...');
-      this.userClient.send('findOne_users', { usua_id: 22 }).subscribe({
+      this.userClient.send('findOne_users', { usua_id: 33 }).subscribe({
         next: (user) => console.log('✅ Respuesta de usuarios-ms:', user),
-        error: (err) => console.error('❌ Error conectando a usuarios-ms:', err),
+        error: (err) => console.error('❌ Error conectando a usuarios-ms set timeout:', err),
       });
     }, 5000);
   }
@@ -33,7 +32,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   onModuleInit() {
     this.$connect
     this.logger.log('Empresas Conectado')
-    this.userClient.send('findOne_users', { usua_id: 22 }).subscribe({
+    this.userClient.send('findOne_users', { usua_id: 33 }).subscribe({
       next: (user) => console.log('✅ Respuesta de usuarios-ms:', user),
       error: (err) => console.error('❌ Error conectando a usuarios-ms desde module init :', err),
     });
@@ -69,7 +68,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
     // 🔹 Crear la empresa sin validar en usuarios-ms
     try {
-      const empresa = await this.prisma.empresa.create({
+      const empresa = await this.empresa.create({
         data: {
           ...createEmpresaDto,
           activo: true,
