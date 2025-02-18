@@ -6,11 +6,17 @@ import { envs } from './config';
 
 async function bootstrap() {
   const logger = new Logger('Main-Empresas-Microservice')
+
+  console.log('🔍 Cargando configuración de Empresas-MS...');
+  console.log('🔍 HOST:', envs.usersMicroserviceHost);
+  console.log('🔍 PUERTO:', envs.usersMicroservicePort);
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.TCP,
       options: {
+      
         port: envs.port
       }
     }

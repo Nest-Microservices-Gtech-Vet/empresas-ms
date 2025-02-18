@@ -30,15 +30,17 @@ model Empresa {
   tipo_empresa_id Int?
   tipo_empresa    Tipo_Empresa? @relation(fields: [tipo_empresa_id], references: [te_id])
 
-  usua_admin_id Int // ID del usuario (está en otro microservicio)
+  usua_admin_id Int // ID del usuario (está en usuarios-ms)
 
-  createdBy Int? // ID del superadmin (está en otro microservicio)
-  updatedBy Int?
+  createdBy      Int? // ID del superadmin (está en usuarios-ms)
+  updatedBy      Int?
 
   activo         Boolean  @default(true)
   fecha_registro DateTime @default(now())
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
+
+  @@unique([usua_admin_id, emp_id])
 }
 
 model Provincia {
@@ -52,6 +54,8 @@ model Provincia {
 
   createdBy Int?
   updatedBy Int?
+
+  
 }
 
 model Canton {
