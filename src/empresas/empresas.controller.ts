@@ -1,35 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, BadRequestException, HttpStatus } from '@nestjs/common';
 import { EmpresasService } from './empresas.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 
 @Controller('empresas')
 export class EmpresasController {
-  constructor(private readonly empresasService: EmpresasService) {}
+  constructor(private readonly empresasService: EmpresasService) { }
 
   //@Post()
-  @MessagePattern({cmd: 'create_empresa'})
-  create(@Payload() createEmpresaDto: CreateEmpresaDto) {
+  @MessagePattern({ cmd: 'create_empresa' })
+  create(@Payload() data: any) {
     //console.log('Mensaje recibido en create_empresa:', createEmpresaDto);
-    return this.empresasService.create(createEmpresaDto);
+    console.log('📩 Recibido en create_empresa:', data);
+    if (!data.createEmpresaDto || !data.createdBy) {
+      console.error('❌ Error: Faltan datos en la petición');
+      throw new RpcException({
+        message: 'Faltan datos obligatorios para crear la empresa',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    return this.empresasService.create(data.createEmpresaDto, data.createdBy);
   }
 
   //@Get()
-  @MessagePattern({cmd: 'findAll_empresas'})
-  findAll(@Payload() payload:any) {
+  @MessagePattern({ cmd: 'findAll_empresas' })
+  findAll(@Payload() payload: any) {
     //console.log('Payload recibido:', payload); 
     return this.empresasService.findAll();
   }
 
   //@Get(':id')
-  @MessagePattern({ cmd: 'findOne_empresa'})
+  @MessagePattern({ cmd: 'findOne_empresa' })
   async findOne(@Payload('emp_id', ParseIntPipe) emp_id: number) {
     return this.empresasService.findOne(emp_id);
   }
 
   //@Patch(':id')
-  @MessagePattern({ cmd: 'update_empresa'})
+  @MessagePattern({ cmd: 'update_empresa' })
   updateEmpresa(
     //@Param('id', ParseIntPipe) emp_id: number, 
     @Body() updateEmpresaDto: UpdateEmpresaDto
@@ -38,10 +47,10 @@ export class EmpresasController {
   }
 
   //@Delete(':id')
-    @MessagePattern({ cmd: 'delete_empresa'})
-    remove(@Payload('emp_id', ParseIntPipe) emp_id: number) {
-      const removeEmp = emp_id;
-      console.log(`el usuario ${removeEmp} a sido eliminado`)
+  @MessagePattern({ cmd: 'delete_empresa' })
+  remove(@Payload('emp_id', ParseIntPipe) emp_id: number) {
+    const removeEmp = emp_id;
+    console.log(`el usuario ${removeEmp} a sido eliminado`)
     return this.empresasService.remove(emp_id);
   }
 }
