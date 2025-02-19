@@ -20,7 +20,6 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
   async create(createEmpresaDto: CreateEmpresaDto, createdBy: number) {
-
     try {
       console.log(`🔍 Validando usuario creador (ID: ${createdBy}) en usuarios-ms...`);
       // 🔍 **Validar que el usuario `createdBy` (quién crea) es un SUPERADMIN activo**
@@ -73,9 +72,13 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
   async findAll() {
-    return await this.empresa.findMany({
-      where: { activo: true }
-    });
+    const totalRegistros = await this.empresa.count({ where: { activo: true } })
+    return {
+      data: await this.empresa.findMany({
+        where: { activo: true }
+      }),
+      metadata: { Total_Registros: totalRegistros }
+    }
   }
 
   async findOne(emp_id: number) {
@@ -96,13 +99,48 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
 
-  async update(emp_id: number, updateEmpresaDto: UpdateEmpresaDto) {
-    await this.findOne(emp_id);
+  async update(emp_id: number, updateEmpresaDto: UpdateEmpresaDto, updatedBy: number) {
+    try {
+      console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
+      // validar usuario que realiza la transsaccion
+      const user = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
 
-    return this.empresa.update({
-      where: { emp_id },
-      data: updateEmpresaDto,
-    });
+      if (!user || !user.activo) {
+        console.error('🚫 Error: El usuario que intenta actualizar no está activo.');
+        throw new RpcException('El usuario que intenta actualizar no está activo.');
+      }
+
+      if (!emp_id) {
+        console.error('❌ Error: `emp_id` es undefined. No se puede actualizar.');
+        throw new BadRequestException('🚫 No se encontró el ID de la empresa para actualizar.');
+      }
+      console.log('✅ Usuario validadado. Procediendo a actualizar empresa...');
+      // 🔥 **Asegurar que la empresa existe antes de actualizar**
+      const existingEmpresa = await this.empresa.findUnique({
+        where: { emp_id }
+      });
+      if (!existingEmpresa) {
+        throw new BadRequestException(`🚫 No se encontró ninguna empresa con ID: ${emp_id}`);
+      }
+      // 🔹 Validar que la empresa existe
+      const empresa = await this.findOne(emp_id);
+
+      const empresaUpdated  = await this.empresa.update({
+        where: { emp_id },
+        data: {
+          ...updateEmpresaDto,
+          updatedBy
+        },
+      });
+      console.log(`✅ Empresa actualizada correctamente: ${empresaUpdated .emp_nombre}`);
+      return empresaUpdated 
+    } catch (error) {
+      console.error('❌ Error al actualizar empresa:', error);
+      throw new RpcException({
+        message: 'Error al actualizar la empresa',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 
 

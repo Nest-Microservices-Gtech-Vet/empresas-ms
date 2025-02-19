@@ -39,18 +39,22 @@ export class EmpresasController {
 
   //@Patch(':id')
   @MessagePattern({ cmd: 'update_empresa' })
-  updateEmpresa(
-    //@Param('id', ParseIntPipe) emp_id: number, 
-    @Body() updateEmpresaDto: UpdateEmpresaDto
-  ) {
-    return this.empresasService.update(updateEmpresaDto.emp_id, updateEmpresaDto);
+  updateEmpresa(@Payload() data:any) {
+    if (!data.updateEmpresaDto || !data.updatedBy) {
+      console.error('❌ Error: Faltan datos en la petición');
+      throw new RpcException({
+        message: 'Faltan datos obligatorios para actualizar la empresa',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+    return this.empresasService.update(data.updateEmpresaDto.emp_id, data.updateEmpresaDto, data.updatedBy);
   }
 
   //@Delete(':id')
   @MessagePattern({ cmd: 'delete_empresa' })
   remove(@Payload('emp_id', ParseIntPipe) emp_id: number) {
     const removeEmp = emp_id;
-    console.log(`el usuario ${removeEmp} a sido eliminado`)
+    console.log(`LA EMPRESA ${removeEmp} a sido eliminado`)
     return this.empresasService.remove(emp_id);
   }
 }
