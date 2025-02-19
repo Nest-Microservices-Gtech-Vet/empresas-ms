@@ -39,6 +39,7 @@ model Empresa {
   fecha_registro DateTime @default(now())
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
+  @@unique([usua_admin_id, emp_id])
 }
 
 model Provincia {

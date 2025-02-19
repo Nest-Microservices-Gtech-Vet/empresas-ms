@@ -13,7 +13,7 @@ export class EmpresasController {
   create(@Payload() data: any) {
     //console.log('Mensaje recibido en create_empresa:', createEmpresaDto);
     console.log('📩 Recibido en create_empresa:', data);
-    if (!data.createEmpresaDto || !data.createdBy) {
+    if (!data.createEmpresaDto || !data.createEmpresaDto.emp_nombre) {
       console.error('❌ Error: Faltan datos en la petición');
       throw new RpcException({
         message: 'Faltan datos obligatorios para crear la empresa',

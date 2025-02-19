@@ -22,12 +22,9 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   async create(createEmpresaDto: CreateEmpresaDto, createdBy: number) {
 
     try {
-      // 🔍 **Validar que el usuario `createdBy` (quién crea) es un SUPERADMIN activo**
       console.log(`🔍 Validando usuario creador (ID: ${createdBy}) en usuarios-ms...`);
-      console.log(`📩 Intentando crear empresa con:`, createEmpresaDto);
-      console.log(`🔍 Usuario que crea la empresa (createdBy):`, createdBy);
-      console.log('🔍 Enviando solicitud a usuarios-ms:', createdBy);
-      const creatorEmp = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createdBy })
+      // 🔍 **Validar que el usuario `createdBy` (quién crea) es un SUPERADMIN activo**
+      const creatorEmp = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.createdBy })
         .toPromise()
         .catch(error => {
           console.error('❌ Error llamando a usuarios-ms:', error);
@@ -38,52 +35,40 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         });
       console.log('⬅️ Respuesta de usuarios-ms:', creatorEmp);
 
-      if (!creatorEmp) {
-        throw new BadRequestException('🚫 El usuario creador no existe en usuarios-ms.');
+      if (!creatorEmp || !creatorEmp.activo || creatorEmp.usua_rol !== 'SUPERADMIN') {
+        console.error('🚫 Error: El usuario creador no es un SUPERADMIN activo.');
+        throw new RpcException('Solo un SUPERADMIN activo puede crear empresas.');
       }
-
-      if (!creatorEmp.activo) {
-        throw new ForbiddenException('🚫 El usuario creador está inactivo.');
-      }
-
-      if (creatorEmp.usua_rol !== 'SUPERADMIN') {
-        throw new ForbiddenException('🚫 Solo un SUPERADMIN puede crear empresas.');
-      }
-
       // 🔍 **Validar que el `usua_admin_id` (administrador asignado) es un ADMIN activo**
-      console.log(`🔍 Validando usuario administrador (ID: ${createEmpresaDto.usua_admin_id}) en usuarios-ms...`);
 
-      console.log('✅ Usuario creador encontrado:', creatorEmp);
 
       const adminUser = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.usua_admin_id }).toPromise();
 
-      if (!adminUser) {
-        throw new BadRequestException('🚫 El usuario administrador no existe en usuarios-ms.');
+      if (!adminUser || !adminUser.activo || adminUser.usua_rol !== 'ADMIN') {
+        console.error('🚫 Error: El usuario administrador no es un ADMIN activo.');
+        throw new RpcException('El usuario administrador debe ser ADMIN activo.');
       }
 
-      console.log('✅ Usuario administrador encontrado:', adminUser);
+      console.log('✅ Usuarios validados. Procediendo a guardar empresa...');
 
-      if (!adminUser.activo) {
-        throw new ForbiddenException('🚫 El usuario administrador está inactivo.');
-      }
-
-      if (adminUser.usua_rol !== 'ADMIN') {
-        throw new ForbiddenException('🚫 El usuario administrador debe tener rol ADMIN.');
-      }
-
+      // 🔹 Intentar guardar en la base de datos
+      console.log('📩 Datos que se enviarán a la base de datos:', createEmpresaDto);
       const empresa = await this.empresa.create({
         data: {
           ...createEmpresaDto,
           activo: true,
-          createdBy: createdBy,
-
+          createdBy,
+          fecha_registro: createEmpresaDto.fecha_registro ? new Date(createEmpresaDto.fecha_registro) : new Date(),
         },
       });
+      this.logger.log(`✅ Empresa creada exitosamente: ${empresa.emp_nombre}`);
       return empresa;
-
-      console.log('✅ Validaciones completadas. Creando empresa...');
     } catch (error) {
-
+      console.error('❌ Error al crear empresa:', error);
+      throw new RpcException({
+        message: 'Error al registrar la empresa',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
