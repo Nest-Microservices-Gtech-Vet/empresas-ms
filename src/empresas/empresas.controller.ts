@@ -57,4 +57,11 @@ export class EmpresasController {
     console.log(`LA EMPRESA ${removeEmp} a sido eliminado`)
     return this.empresasService.remove(emp_id);
   }
+
+  //empresas administradas por el usuario admin
+  @MessagePattern({ cmd: 'findEmpresasByAdmin'})
+  findEmpresasByAdmin(@Payload() data: { usua_admin_id: number }){
+    console.log(`🔍 Buscando empresas administradas por el usuario ID: ${data.usua_admin_id}`);
+    return this.empresasService.findEmpresasByAdmin(data.usua_admin_id);
+  }
 }

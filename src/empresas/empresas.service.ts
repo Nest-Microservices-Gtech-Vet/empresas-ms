@@ -154,4 +154,11 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     });
     return empresa;
   }
+
+  // usuasrios admin empresas por id
+  async findEmpresasByAdmin(usua_admin_id: number) {
+    return await this.empresa.findMany({
+      where:{usua_admin_id, activo: true}
+    })
+  }
 }
