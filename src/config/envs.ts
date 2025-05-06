@@ -4,6 +4,7 @@ import * as joi from 'joi'
 interface EnvVars{
     PORT: number;
     DATABASE_URL: string;
+    JWT_SECRET: string,
     USERS_MICROSERVICE_HOST: string;
     USERS_MICROSERVICE_PORT: number;
 }
@@ -11,6 +12,7 @@ interface EnvVars{
 const envsSchema = joi.object({
     PORT: joi.number().required(),
     DATABASE_URL: joi.string().required(),
+    JWT_SECRET: joi.string().required(),
     USERS_MICROSERVICE_HOST: joi.string().required(),
     USERS_MICROSERVICE_PORT: joi.number().required(),
 })
@@ -27,6 +29,8 @@ const envVars: EnvVars = value;
 export const envs = {
     port: envVars.PORT,
     databaseurl: envVars.DATABASE_URL,
-    usersMicroservicesHost: envVars.USERS_MICROSERVICE_HOST,
-    usersMicroservicesPort: envVars.USERS_MICROSERVICE_PORT,
+    secret: envVars.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN ||'1h',
+    usersMicroserviceHost: envVars.USERS_MICROSERVICE_HOST, 
+    usersMicroservicePort: envVars.USERS_MICROSERVICE_PORT, 
 }

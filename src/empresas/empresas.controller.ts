@@ -1,27 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, BadRequestException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, BadRequestException, HttpStatus,UseGuards } from '@nestjs/common';
 import { EmpresasService } from './empresas.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
-@Controller('empresas')
+@Controller()
 export class EmpresasController {
   constructor(private readonly empresasService: EmpresasService) { }
 
   //@Post()
+  // @MessagePattern({ cmd: 'create_empresa' })
+  // create(@Payload() data: any) {
+  //   //console.log('Mensaje recibido en create_empresa:', createEmpresaDto);
+  //   console.log('📩 Recibido en create_empresa:', data);
+  //   if (!data.createEmpresaDto || !data.createEmpresaDto.emp_nombre) {
+  //     console.error('❌ Error: Faltan datos en la petición');
+  //     throw new RpcException({
+  //       message: 'Faltan datos obligatorios para crear la empresa',
+  //       status: HttpStatus.BAD_REQUEST,
+  //     });
+  //   }
+
+  //   return this.empresasService.create(data.createEmpresaDto, data.createdBy);
+  // }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
   @MessagePattern({ cmd: 'create_empresa' })
-  create(@Payload() data: any) {
-    //console.log('Mensaje recibido en create_empresa:', createEmpresaDto);
+  create(@Payload() data: { createEmpresaDto: CreateEmpresaDto, user: any }) {
     console.log('📩 Recibido en create_empresa:', data);
-    if (!data.createEmpresaDto || !data.createEmpresaDto.emp_nombre) {
-      console.error('❌ Error: Faltan datos en la petición');
-      throw new RpcException({
-        message: 'Faltan datos obligatorios para crear la empresa',
-        status: HttpStatus.BAD_REQUEST,
-      });
+
+    if (!data.user || data.user.role !== 'SUPERADMIN') {
+      console.error('🚫 Acceso denegado: solo SUPERADMIN puede crear empresas.');
+      throw new Error('Solo un SUPERADMIN puede crear empresas.');
     }
 
-    return this.empresasService.create(data.createEmpresaDto, data.createdBy);
+    return this.empresasService.create(data.createEmpresaDto, data.user.userId);
   }
 
   //@Get()

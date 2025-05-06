@@ -1,10 +1,9 @@
-import { IsBoolean, IsDate, IsDateString, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsDate, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateEmpresaDto {
     @IsString()
     emp_nombre: string;
 
-    @IsString()
     @IsEmail()
     emp_correo: string;
 
@@ -20,30 +19,17 @@ export class CreateEmpresaDto {
     @MaxLength(13)
     emp_ruc: string;
 
-
     @IsInt()
     provincia_id: number;
 
-
     @IsInt()
     canton_id: number;
-
 
     @IsInt()
     tipo_empresa_id: number;
 
     @IsInt()
     usua_admin_id: number; // ID del usuario administrador
-
-    @IsInt()
-    createdBy: number;
-
-
-
-    @IsInt()
-    updatedBy?: number;
-
-
 
     @IsOptional()
     @IsBoolean()
@@ -52,9 +38,4 @@ export class CreateEmpresaDto {
     @IsOptional()
     @IsDate()
     fecha_registro?: Date;
-
-
-
-
-
 }
