@@ -1,26 +1,14 @@
 import { Module } from '@nestjs/common';
 import { EmpresasService } from './empresas.service';
 import { EmpresasController } from './empresas.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { USERS_SERVICE } from 'src/config/services';
-import { envs } from 'src/config/envs';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { NatsModule } from 'src/transports/nats.module';
+
 
 @Module({
   controllers: [EmpresasController],
-  providers: [EmpresasService,JwtAuthGuard, RolesGuard],
+  providers: [EmpresasService,],
   imports:[
-    ClientsModule.register([
-      { 
-        name: USERS_SERVICE, 
-        transport: Transport.TCP,
-        options: {
-          host: envs.usersMicroserviceHost,
-          port: envs.usersMicroservicePort,
-        } 
-      },
-    ]),
+    NatsModule
   ],
 })
 export class EmpresasModule {}

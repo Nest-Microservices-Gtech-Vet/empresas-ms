@@ -2,19 +2,20 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProvinciasService } from './provincias.service';
 import { CreateProvinciaDto } from './dto/create-provincia.dto';
 import { UpdateProvinciaDto } from './dto/update-provincia.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('provincias')
 export class ProvinciasController {
   constructor(private readonly provinciasService: ProvinciasService) {}
 
-  @Post()
-  create(@Body() createProvinciaDto: CreateProvinciaDto) {
-    return this.provinciasService.create(createProvinciaDto);
+  @MessagePattern({ cmd: 'create_prov' })
+  createProv(@Payload() createProvDto: CreateProvinciaDto){
+    return this.provinciasService.create(createProvDto)
   }
 
-  @Get()
-  findAll() {
-    return this.provinciasService.findAll();
+  @MessagePattern({ cmd: 'getAllProv' })
+  getProv(@Payload() _payload:any){
+    return this.provinciasService.findAll()
   }
 
   @Get(':id')

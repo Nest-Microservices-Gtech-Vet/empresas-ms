@@ -2,18 +2,19 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { TiposEmpresasService } from './tipos-empresas.service';
 import { CreateTiposEmpresaDto } from './dto/create-tipos-empresa.dto';
 import { UpdateTiposEmpresaDto } from './dto/update-tipos-empresa.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('tipos-empresas')
 export class TiposEmpresasController {
-  constructor(private readonly tiposEmpresasService: TiposEmpresasService) {}
+  constructor(private readonly tiposEmpresasService: TiposEmpresasService) { }
 
-  @Post()
-  create(@Body() createTiposEmpresaDto: CreateTiposEmpresaDto) {
-    return this.tiposEmpresasService.create(createTiposEmpresaDto);
+  @MessagePattern({ cmd: 'create_tipoEmp' })
+  createTipoEmp(@Payload() createTiposEmpresasDto: CreateTiposEmpresaDto) {
+    return this.tiposEmpresasService.create(createTiposEmpresasDto)
   }
 
-  @Get()
-  findAll() {
+  @MessagePattern({ cmd: 'get_tipoEmp'})
+  getTipoEmp(@Payload() any){
     return this.tiposEmpresasService.findAll();
   }
 

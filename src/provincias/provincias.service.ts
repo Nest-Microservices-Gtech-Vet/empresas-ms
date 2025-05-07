@@ -17,7 +17,7 @@ export class ProvinciasService extends PrismaClient implements OnModuleInit{
   }
 
   findAll() {
-    return `This action returns all provincias`;
+    return this.provincia.findMany();
   }
 
   findOne(id: number) {

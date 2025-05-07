@@ -2,19 +2,20 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CantonesService } from './cantones.service';
 import { CreateCantonDto } from './dto/create-cantone.dto';
 import { UpdateCantoneDto } from './dto/update-cantone.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('cantones')
 export class CantonesController {
   constructor(private readonly cantonesService: CantonesService) {}
 
-  @Post()
-  create(@Body() createCantonDto: CreateCantonDto) {
-    return this.cantonesService.create(createCantonDto);
+  @MessagePattern({ cmd: 'create_cant'})
+  createCan(@Payload() createCantonDto: CreateCantonDto){
+    return this.cantonesService.create(createCantonDto)
   }
 
-  @Get()
-  findAll() {
-    return this.cantonesService.findAll();
+  @MessagePattern({ cmd: 'getCant'})
+  getCan(@Payload() _payload:any){
+    return this.cantonesService.findAll()
   }
 
   @Get(':id')

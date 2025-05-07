@@ -17,7 +17,7 @@ export class TiposEmpresasService extends PrismaClient implements OnModuleInit {
   }
 
   findAll() {
-    return `This action returns all tiposEmpresas`;
+    return this.tipo_Empresa.findMany();
   }
 
   findOne(id: number) {

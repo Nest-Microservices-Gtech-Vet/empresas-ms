@@ -3,9 +3,6 @@ import { EmpresasService } from './empresas.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller()
 export class EmpresasController {
@@ -27,8 +24,7 @@ export class EmpresasController {
   //   return this.empresasService.create(data.createEmpresaDto, data.createdBy);
   // }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPERADMIN')
+
   @MessagePattern({ cmd: 'create_empresa' })
   create(@Payload() data: { createEmpresaDto: CreateEmpresaDto, user: any }) {
     console.log('📩 Recibido en create_empresa:', data);

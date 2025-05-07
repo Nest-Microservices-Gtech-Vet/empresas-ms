@@ -3,13 +3,13 @@ import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { USERS_SERVICE } from 'src/config';
+import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 
 @Injectable()
 export class EmpresasService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('Emprresa Service')
   constructor(
-    @Inject(USERS_SERVICE) private readonly usersClient: ClientProxy
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy
   ) {
     super();
   }
@@ -78,7 +78,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       // 🔍 Validar que el usuario `createdBy` es un SUPERADMIN activo
       console.log(`📩 Enviando solicitud a usuarios-ms para validar usuario con ID: ${createdBy}`);
 
-      const creatorEmp = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createdBy })
+      const creatorEmp = await this.client.send({ cmd: 'findOne_users' }, { usua_id: createdBy })
         .toPromise()
         .catch(error => {
           console.error('❌ Error llamando a usuarios-ms:', error);
@@ -96,7 +96,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       }
 
       console.log(`🔍 Validando usuario administrador (ID: ${createEmpresaDto.usua_admin_id}) en usuarios-ms...`);
-      const adminUser = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.usua_admin_id }).toPromise();
+      const adminUser = await this.client.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.usua_admin_id }).toPromise();
       if (!adminUser || !adminUser.activo || adminUser.usua_rol !== 'ADMIN') {
         throw new RpcException('🚫 El usuario administrador debe ser ADMIN activo.');
       }
@@ -154,7 +154,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     try {
       console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
       // validar usuario que realiza la transsaccion
-      const user = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
+      const user = await this.client.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
 
       if (!user || !user.activo) {
         console.error('🚫 Error: El usuario que intenta actualizar no está activo.');
