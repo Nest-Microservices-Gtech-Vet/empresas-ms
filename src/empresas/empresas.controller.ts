@@ -25,16 +25,11 @@ export class EmpresasController {
   // }
 
 
-  @MessagePattern({ cmd: 'create_empresa' })
-  create(@Payload() data: { createEmpresaDto: CreateEmpresaDto, user: any }) {
-    console.log('📩 Recibido en create_empresa:', data);
+  @MessagePattern({ cmd: 'create_empresa'})
+  createEmp(@Payload() createEmpresaDto: CreateEmpresaDto ) {
+    console.log('📩 Recibido en create_empresa:', createEmpresaDto);
 
-    if (!data.user || data.user.role !== 'SUPERADMIN') {
-      console.error('🚫 Acceso denegado: solo SUPERADMIN puede crear empresas.');
-      throw new Error('Solo un SUPERADMIN puede crear empresas.');
-    }
-
-    return this.empresasService.create(data.createEmpresaDto, data.user.userId);
+    return this.empresasService.create(createEmpresaDto);
   }
 
   //@Get()
@@ -50,18 +45,18 @@ export class EmpresasController {
     return this.empresasService.findOne(emp_id);
   }
 
-  //@Patch(':id')
-  @MessagePattern({ cmd: 'update_empresa' })
-  updateEmpresa(@Payload() data:any) {
-    if (!data.updateEmpresaDto || !data.updatedBy) {
-      console.error('❌ Error: Faltan datos en la petición');
-      throw new RpcException({
-        message: 'Faltan datos obligatorios para actualizar la empresa',
-        status: HttpStatus.BAD_REQUEST,
-      });
-    }
-    return this.empresasService.update(data.updateEmpresaDto.emp_id, data.updateEmpresaDto, data.updatedBy);
-  }
+  // //@Patch(':id')
+  // @MessagePattern({ cmd: 'update_empresa' })
+  // updateEmpresa(@Payload() data:any) {
+  //   if (!data.updateEmpresaDto || !data.updatedBy) {
+  //     console.error('❌ Error: Faltan datos en la petición');
+  //     throw new RpcException({
+  //       message: 'Faltan datos obligatorios para actualizar la empresa',
+  //       status: HttpStatus.BAD_REQUEST,
+  //     });
+  //   }
+  //   return this.empresasService.update(data.updateEmpresaDto.emp_id, data.updateEmpresaDto, data.updatedBy);
+  // }
 
   //@Delete(':id')
   @MessagePattern({ cmd: 'delete_empresa' })

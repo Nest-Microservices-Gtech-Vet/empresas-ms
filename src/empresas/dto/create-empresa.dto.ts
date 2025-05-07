@@ -31,6 +31,15 @@ export class CreateEmpresaDto {
     @IsInt()
     usua_admin_id: number; // ID del usuario administrador
 
+    
+    @IsInt()
+    createdBy?: number;
+
+    
+   
+    @IsInt()
+    updatedBy?: number;
+
     @IsOptional()
     @IsBoolean()
     activo?: boolean;

@@ -8,11 +8,6 @@ import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 @Injectable()
 export class EmpresasService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('Emprresa Service')
-  constructor(
-    @Inject(NATS_SERVICE) private readonly client: ClientProxy
-  ) {
-    super();
-  }
 
   onModuleInit() {
     this.$connect
@@ -71,55 +66,30 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   //   }
   // }
 
-  async create(createEmpresaDto: CreateEmpresaDto, createdBy: number) {
-    try {
-      console.log(`🔍 Validando usuario creador (ID: ${createdBy}) en usuarios-ms...`);
-
-      // 🔍 Validar que el usuario `createdBy` es un SUPERADMIN activo
-      console.log(`📩 Enviando solicitud a usuarios-ms para validar usuario con ID: ${createdBy}`);
-
-      const creatorEmp = await this.client.send({ cmd: 'findOne_users' }, { usua_id: createdBy })
-        .toPromise()
-        .catch(error => {
-          console.error('❌ Error llamando a usuarios-ms:', error);
-          throw new RpcException({
-            message: `Error validando usuario en usuarios-ms: ${JSON.stringify(error)}`,
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-          });
-        });
-
-      console.log('🔄 Respuesta de usuarios-ms:', creatorEmp);
-
-
-      if (!creatorEmp || !creatorEmp.activo || creatorEmp.usua_rol !== 'SUPERADMIN') {
-        throw new RpcException('🚫 Solo un SUPERADMIN activo puede crear empresas.');
-      }
-
-      console.log(`🔍 Validando usuario administrador (ID: ${createEmpresaDto.usua_admin_id}) en usuarios-ms...`);
-      const adminUser = await this.client.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.usua_admin_id }).toPromise();
-      if (!adminUser || !adminUser.activo || adminUser.usua_rol !== 'ADMIN') {
-        throw new RpcException('🚫 El usuario administrador debe ser ADMIN activo.');
-      }
-
-      console.log('✅ Usuarios validados. Procediendo a guardar empresa...');
-      const empresa = await this.empresa.create({
-        data: {
-          ...createEmpresaDto,
-          activo: true,
-          createdBy,
-          fecha_registro: new Date(),
+  async create(createEmpDto: CreateEmpresaDto){
+    const empresa = await this.empresa.create({
+      data: {
+        emp_nombre: createEmpDto.emp_nombre,
+        emp_correo: createEmpDto.emp_correo,
+        emp_direccion: createEmpDto.emp_direccion,
+        emp_telefono: createEmpDto.emp_telefono,
+        emp_ruc: createEmpDto.emp_ruc,
+        usua_admin_id: createEmpDto.usua_admin_id,
+        activo: createEmpDto.activo ?? true,
+        createdBy: createEmpDto.createdBy,
+        updatedBy: createEmpDto.updatedBy,
+        provincia: {
+          connect: { prov_id: createEmpDto.provincia_id }
         },
-      });
-
-      console.log(`✅ Empresa creada exitosamente: ${empresa.emp_nombre}`);
-      return empresa;
-    } catch (error) {
-      console.error('❌ Error al crear empresa:', error);
-      throw new RpcException({
-        message: 'Error al registrar la empresa',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      });
-    }
+        canton: {
+          connect: { can_id: createEmpDto.canton_id }
+        },
+        tipo_empresa: {
+          connect: { te_id: createEmpDto.tipo_empresa_id }
+        },
+      },
+    });
+    return empresa;
   }
 
   async findAll() {
@@ -150,49 +120,49 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
 
-  async update(emp_id: number, updateEmpresaDto: UpdateEmpresaDto, updatedBy: number) {
-    try {
-      console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
-      // validar usuario que realiza la transsaccion
-      const user = await this.client.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
+  // async update(emp_id: number, updateEmpresaDto: UpdateEmpresaDto, updatedBy: number) {
+  //   try {
+  //     console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
+  //     // validar usuario que realiza la transsaccion
+  //     const user = await this.client.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
 
-      if (!user || !user.activo) {
-        console.error('🚫 Error: El usuario que intenta actualizar no está activo.');
-        throw new RpcException('El usuario que intenta actualizar no está activo.');
-      }
+  //     if (!user || !user.activo) {
+  //       console.error('🚫 Error: El usuario que intenta actualizar no está activo.');
+  //       throw new RpcException('El usuario que intenta actualizar no está activo.');
+  //     }
 
-      if (!emp_id) {
-        console.error('❌ Error: `emp_id` es undefined. No se puede actualizar.');
-        throw new BadRequestException('🚫 No se encontró el ID de la empresa para actualizar.');
-      }
-      console.log('✅ Usuario validadado. Procediendo a actualizar empresa...');
-      // 🔥 **Asegurar que la empresa existe antes de actualizar**
-      const existingEmpresa = await this.empresa.findUnique({
-        where: { emp_id }
-      });
-      if (!existingEmpresa) {
-        throw new BadRequestException(`🚫 No se encontró ninguna empresa con ID: ${emp_id}`);
-      }
-      // 🔹 Validar que la empresa existe
-      const empresa = await this.findOne(emp_id);
+  //     if (!emp_id) {
+  //       console.error('❌ Error: `emp_id` es undefined. No se puede actualizar.');
+  //       throw new BadRequestException('🚫 No se encontró el ID de la empresa para actualizar.');
+  //     }
+  //     console.log('✅ Usuario validadado. Procediendo a actualizar empresa...');
+  //     // 🔥 **Asegurar que la empresa existe antes de actualizar**
+  //     const existingEmpresa = await this.empresa.findUnique({
+  //       where: { emp_id }
+  //     });
+  //     if (!existingEmpresa) {
+  //       throw new BadRequestException(`🚫 No se encontró ninguna empresa con ID: ${emp_id}`);
+  //     }
+  //     // 🔹 Validar que la empresa existe
+  //     const empresa = await this.findOne(emp_id);
 
-      const empresaUpdated = await this.empresa.update({
-        where: { emp_id },
-        data: {
-          ...updateEmpresaDto,
-          updatedBy
-        },
-      });
-      console.log(`✅ Empresa actualizada correctamente: ${empresaUpdated.emp_nombre}`);
-      return empresaUpdated
-    } catch (error) {
-      console.error('❌ Error al actualizar empresa:', error);
-      throw new RpcException({
-        message: 'Error al actualizar la empresa',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      });
-    }
-  }
+  //     const empresaUpdated = await this.empresa.update({
+  //       where: { emp_id },
+  //       data: {
+  //         ...updateEmpresaDto,
+  //         updatedBy
+  //       },
+  //     });
+  //     console.log(`✅ Empresa actualizada correctamente: ${empresaUpdated.emp_nombre}`);
+  //     return empresaUpdated
+  //   } catch (error) {
+  //     console.error('❌ Error al actualizar empresa:', error);
+  //     throw new RpcException({
+  //       message: 'Error al actualizar la empresa',
+  //       status: HttpStatus.INTERNAL_SERVER_ERROR,
+  //     });
+  //   }
+  // }
 
 
   async remove(emp_id: number) {
