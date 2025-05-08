@@ -9,6 +9,13 @@ import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 export class EmpresasService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('Emprresa Service')
 
+  constructor(
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy, // 👈 client NATS a usuarios-ms
+  ) {
+    super();
+  }  
+
+
   onModuleInit() {
     this.$connect
     this.logger.log('Empresas Conectado')
@@ -67,6 +74,19 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   // }
 
   async create(createEmpDto: CreateEmpresaDto){
+    //validacion usuario aDMIN--VALIDAR QUE EL USUARIO EXISTE EN USUARIOS-MS
+    const {usua_admin_id} = createEmpDto;
+    console.log(`🟢 Validando usuario admin ${usua_admin_id} desde empresas-ms...`);
+
+    const resultadoAdmin = await  this.client.send('validar_user_admin',usua_admin_id).toPromise();
+
+    if(!resultadoAdmin.valid){
+      console.warn(`⚠️ Usuario admin ${usua_admin_id} no es válido o no es admin`);
+      throw new Error(`El usuario administrador no es válido o no tiene permisos de ADMIN`);
+    }
+
+    console.log(`✅ Usuario admin ${usua_admin_id} es válido. Procediendo a crear empresa...`);
+    //FIN VALIDACION USUARIO ADMIN
     const empresa = await this.empresa.create({
       data: {
         emp_nombre: createEmpDto.emp_nombre,
@@ -182,4 +202,13 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       where: { usua_admin_id, activo: true }
     })
   }
+  //fin findEmpresasByAdmin
+  // validar usuario admin
+  // async validarUsuarioAdmin(usua_admin_id:number): Promise<boolean>{
+  //   try {
+  //     const resultado = await this
+  //   } catch (error) {
+      
+  //   }
+  // }
 }

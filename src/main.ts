@@ -26,5 +26,6 @@ async function bootstrap() {
 
   await app.listen();
   logger.log(`Microservicio de Empresas corriendo en el puerto ${envs.port}`)
+
 }
 bootstrap();

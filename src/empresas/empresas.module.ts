@@ -7,8 +7,8 @@ import { NatsModule } from 'src/transports/nats.module';
 @Module({
   controllers: [EmpresasController],
   providers: [EmpresasService,],
-  // imports:[
-  //   NatsModule
-  // ],
+  imports:[
+    NatsModule
+  ],
 })
 export class EmpresasModule {}
