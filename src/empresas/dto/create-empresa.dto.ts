@@ -31,12 +31,12 @@ export class CreateEmpresaDto {
     @IsInt()
     usua_admin_id: number; // ID del usuario administrador
 
-    
+    @IsOptional()
     @IsInt()
     createdBy?: number;
 
-    
-   
+
+    @IsOptional()
     @IsInt()
     updatedBy?: number;
 
