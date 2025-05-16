@@ -203,7 +203,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
 
 
-  async remove(emp_id: number, updatedBy:number) {
+  async remove(emp_id: number, updatedBy: number) {
     await this.findOne(emp_id);
     const empresa = await this.empresa.update({
       where: { emp_id },
@@ -215,19 +215,15 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     return empresa;
   }
 
-  // usuasrios admin empresas por id
-  async findEmpresasByAdmin(usua_admin_id: number) {
-    return await this.empresa.findMany({
-      where: { usua_admin_id, activo: true }
-    })
-  }
-  //fin findEmpresasByAdmin
-  // validar usuario admin
-  // async validarUsuarioAdmin(usua_admin_id:number): Promise<boolean>{
-  //   try {
-  //     const resultado = await this
-  //   } catch (error) {
 
-  //   }
-  // }
+
+  async obtenerEmpresasPorAdmin(usua_admin_id: number) {
+    return this.empresa.findMany({
+      where: {
+        usua_admin_id,
+        //activo: true,
+      },
+    });
+  }
+
 }
