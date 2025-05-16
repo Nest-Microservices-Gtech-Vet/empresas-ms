@@ -136,7 +136,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     const empresa = await this.empresa.findFirst({
       where: {
         emp_id,
-        activo: true
+        //activo: true
       }
     });
 
@@ -168,8 +168,8 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       }
 
       console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
-      const user = await this.client.send({ cmd: 'findOne_users' }, { usua_id: updatedBy }).toPromise();
-      console.log('📦 Enviando a usuarios-ms:', { cmd: 'findOne_users' }, { usua_id: updatedBy });
+      const user = await this.client.send({ cmd: 'findOne_users' }, {id: updatedBy }).toPromise();
+      console.log('📦 Enviando a usuarios-ms:', { cmd: 'findOne_users' }, { id: updatedBy });
 
 
       if (!user || !user.activo) {
