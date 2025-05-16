@@ -29,6 +29,16 @@ export class EmpresasController {
 
 //****************************************** */
 
+ //inicio obtener empresa inactivas
+  @MessagePattern({ cmd: 'findAll_empresas.inac' })
+  findAllInac(@Payload() payload: any) {
+    //console.log('Payload recibido:', payload); 
+    return this.empresasService.findAllInactivas();
+  }
+  //fin obtener empresa
+
+//****************************************** */
+
   //inicio obtener empresa por id
   @MessagePattern({ cmd: 'findOne_empresa' })
   async findOne(@Payload('emp_id', ParseIntPipe) emp_id: number) {

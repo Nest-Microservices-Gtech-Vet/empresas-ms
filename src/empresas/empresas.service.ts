@@ -122,6 +122,16 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     }
   }
 
+   async findAllInactivas() {
+    const totalRegistros = await this.empresa.count({ where: { activo: false } })
+    return {
+      data: await this.empresa.findMany({
+        where: { activo: false }
+      }),
+      metadata: { Total_Registros: totalRegistros }
+    }
+  }
+
   async findOne(emp_id: number) {
     const empresa = await this.empresa.findFirst({
       where: {
