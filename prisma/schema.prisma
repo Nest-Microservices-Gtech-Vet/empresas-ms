@@ -20,6 +20,8 @@ model Empresa {
   emp_direccion String @db.VarChar(255)
   emp_telefono  String @db.VarChar(10)
   emp_ruc       String @unique @db.VarChar(13)
+  emp_tipo_empresa String @db.VarChar(255)
+
 
   provincia_id Int?
   provincia    Provincia? @relation(fields: [provincia_id], references: [prov_id])
@@ -27,8 +29,7 @@ model Empresa {
   canton_id Int?
   canton    Canton? @relation(fields: [canton_id], references: [can_id])
 
-  tipo_empresa_id Int?
-  tipo_empresa    Tipo_Empresa? @relation(fields: [tipo_empresa_id], references: [te_id])
+
 
   usua_admin_id Int // ID del usuario (está en otro microservicio)
 
@@ -69,14 +70,4 @@ model Canton {
   updatedBy Int?
 }
 
-model Tipo_Empresa {
-  te_id      Int       @id @default(autoincrement())
-  te_nombre  String    @db.VarChar(255)
-  empresas   Empresa[]
-  activo     Boolean   @default(true)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
 
-  createdBy Int? // ID del superadmin (está en otro microservicio)
-  updatedBy Int?
-}

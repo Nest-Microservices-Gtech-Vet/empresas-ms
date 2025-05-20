@@ -94,6 +94,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         emp_direccion: createEmpDto.emp_direccion,
         emp_telefono: createEmpDto.emp_telefono,
         emp_ruc: createEmpDto.emp_ruc,
+        emp_tipo_empresa:createEmpDto.emp_tipo_empresa,
         usua_admin_id: createEmpDto.usua_admin_id,
         activo: createEmpDto.activo ?? true,
         createdBy: createEmpDto.createdBy,
@@ -104,9 +105,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         canton: {
           connect: { can_id: createEmpDto.canton_id }
         },
-        tipo_empresa: {
-          connect: { te_id: createEmpDto.tipo_empresa_id }
-        },
+       
       },
     });
     return empresa;

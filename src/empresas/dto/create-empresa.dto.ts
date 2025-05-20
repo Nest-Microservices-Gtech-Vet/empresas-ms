@@ -19,14 +19,15 @@ export class CreateEmpresaDto {
     @MaxLength(13)
     emp_ruc: string;
 
+    @IsString()
+    emp_tipo_empresa: string;
+
     @IsInt()
     provincia_id: number;
 
     @IsInt()
     canton_id: number;
 
-    @IsInt()
-    tipo_empresa_id: number;
 
     @IsInt()
     usua_admin_id: number; // ID del usuario administrador
