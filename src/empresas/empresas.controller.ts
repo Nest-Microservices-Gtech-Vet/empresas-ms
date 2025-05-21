@@ -27,9 +27,9 @@ export class EmpresasController {
   }
   //fin obtener empresa
 
-//****************************************** */
+  //****************************************** */
 
- //inicio obtener empresa inactivas
+  //inicio obtener empresa inactivas
   @MessagePattern({ cmd: 'findAll_empresas.inac' })
   findAllInac(@Payload() payload: any) {
     //console.log('Payload recibido:', payload); 
@@ -37,7 +37,7 @@ export class EmpresasController {
   }
   //fin obtener empresa
 
-//****************************************** */
+  //****************************************** */
 
   //inicio obtener empresa por id
   @MessagePattern({ cmd: 'findOne_empresa' })
@@ -82,8 +82,14 @@ export class EmpresasController {
     const { user } = data;
     return this.empresasService.obtenerEmpresasPorAdmin(user.id);
   }
-// inicio empresas administradas por el usuario admin
+  // inicio empresas administradas por el usuario admin
 
-//****************************************** */
+  //****************************************** */
+
+  @MessagePattern('empresas.validar-empresa-admin')
+  async validarEmpresaDelAdmin(@Payload() data: { empresa_id: number; admin_id: number }) {
+    return this.empresasService.validarEmpresaPorAdmin(data.empresa_id, data.admin_id);
+  }
+
 
 }

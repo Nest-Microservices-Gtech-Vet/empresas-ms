@@ -21,58 +21,6 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     this.logger.log('Empresas Conectado')
   }
 
-  // async create(createEmpresaDto: CreateEmpresaDto, createdBy: number) {
-  //   try {
-  //     console.log(`🔍 Validando usuario creador (ID: ${createdBy}) en usuarios-ms...`);
-  //     // 🔍 **Validar que el usuario `createdBy` (quién crea) es un SUPERADMIN activo**
-  //     const creatorEmp = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.createdBy })
-  //       .toPromise()
-  //       .catch(error => {
-  //         console.error('❌ Error llamando a usuarios-ms:', error);
-  //         throw new RpcException({
-  //           message: 'Error validando usuario en usuarios-ms',
-  //           status: HttpStatus.INTERNAL_SERVER_ERROR,
-  //         });
-  //       });
-  //     console.log('⬅️ Respuesta de usuarios-ms:', creatorEmp);
-
-  //     if (!creatorEmp || !creatorEmp.activo || creatorEmp.usua_rol !== 'SUPERADMIN') {
-  //       console.error('🚫 Error: El usuario creador no es un SUPERADMIN activo.');
-  //       throw new RpcException('Solo un SUPERADMIN activo puede crear empresas.');
-  //     }
-  //     // 🔍 **Validar que el `usua_admin_id` (administrador asignado) es un ADMIN activo**
-
-
-  //     const adminUser = await this.usersClient.send({ cmd: 'findOne_users' }, { usua_id: createEmpresaDto.usua_admin_id }).toPromise();
-
-  //     if (!adminUser || !adminUser.activo || adminUser.usua_rol !== 'ADMIN') {
-  //       console.error('🚫 Error: El usuario administrador no es un ADMIN activo.');
-  //       throw new RpcException('El usuario administrador debe ser ADMIN activo.');
-  //     }
-
-  //     console.log('✅ Usuarios validados. Procediendo a guardar empresa...');
-
-  //     // 🔹 Intentar guardar en la base de datos
-  //     console.log('📩 Datos que se enviarán a la base de datos:', createEmpresaDto);
-  //     const empresa = await this.empresa.create({
-  //       data: {
-  //         ...createEmpresaDto,
-  //         activo: true,
-  //         createdBy,
-  //         fecha_registro: createEmpresaDto.fecha_registro ? new Date(createEmpresaDto.fecha_registro) : new Date(),
-  //       },
-  //     });
-  //     this.logger.log(`✅ Empresa creada exitosamente: ${empresa.emp_nombre}`);
-  //     return empresa;
-  //   } catch (error) {
-  //     console.error('❌ Error al crear empresa:', error);
-  //     throw new RpcException({
-  //       message: 'Error al registrar la empresa',
-  //       status: HttpStatus.INTERNAL_SERVER_ERROR,
-  //     });
-  //   }
-  // }
-
   async create(createEmpDto: CreateEmpresaDto) {
     //validacion usuario aDMIN--VALIDAR QUE EL USUARIO EXISTE EN USUARIOS-MS
     const { usua_admin_id } = createEmpDto;
@@ -233,6 +181,22 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         //activo: true,
       },
     });
+  }
+
+  async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{valido: boolean; motivo?: string}>{
+    const empresa = await this.empresa.findUnique({
+      where: {emp_id: empresa_id},
+    });
+
+    if (!empresa){
+      return { valido: false, motivo: 'NO_EXISTE LA EMPRESA'};
+    }
+
+    if (empresa.usua_admin_id !== usua_admin_id){
+      return { valido: false, motivo: 'NO_AUTORIZADO' };
+    }
+
+    return { valido: true };
   }
 
 }
