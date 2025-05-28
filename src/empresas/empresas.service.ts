@@ -4,6 +4,7 @@ import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
+import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
 
 @Injectable()
 export class EmpresasService extends PrismaClient implements OnModuleInit {
@@ -22,19 +23,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
   async create(createEmpDto: CreateEmpresaDto) {
-    //validacion usuario aDMIN--VALIDAR QUE EL USUARIO EXISTE EN USUARIOS-MS
-    const { usua_admin_id } = createEmpDto;
-    console.log(`🟢 Validando usuario admin ${usua_admin_id} desde empresas-ms...`);
 
-    const resultadoAdmin = await this.client.send('validar_user_admin', usua_admin_id).toPromise();
-
-    if (!resultadoAdmin.valid) {
-      console.warn(`⚠️ Usuario admin ${usua_admin_id} no es válido o no es admin`);
-      throw new Error(`El usuario administrador no es válido o no tiene permisos de ADMIN`);
-    }
-
-    console.log(`✅ Usuario admin ${usua_admin_id} es válido. Procediendo a crear empresa...`);
-    //FIN VALIDACION USUARIO ADMIN
     const empresa = await this.empresa.create({
       data: {
         emp_nombre: createEmpDto.emp_nombre,
@@ -43,8 +32,10 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         emp_telefono: createEmpDto.emp_telefono,
         emp_ruc: createEmpDto.emp_ruc,
         emp_tipo_empresa:createEmpDto.emp_tipo_empresa,
-        usua_admin_id: createEmpDto.usua_admin_id,
+        //usua_admin_id: createEmpDto.usua_admin_id,
         activo: createEmpDto.activo ?? true,
+        fecha_inicio:createEmpDto.fecha_inicio,
+        fecha_fin: createEmpDto.fecha_fin,
         createdBy: createEmpDto.createdBy,
         updatedBy: createEmpDto.updatedBy,
         provincia: {
@@ -99,20 +90,20 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
   async update(emp_id: number, updateEmpresaDto: UpdateEmpresaDto, updatedBy: number) {
     try {
-      const { usua_admin_id } = updateEmpresaDto;
+      // const { usua_admin_id } = updateEmpresaDto;
 
-      if (usua_admin_id !== undefined && usua_admin_id !== null) {
-        console.log(`🟢 Validando usuario admin ${usua_admin_id} desde empresas-ms...`);
+      // if (usua_admin_id !== undefined && usua_admin_id !== null) {
+      //   console.log(`🟢 Validando usuario admin ${usua_admin_id} desde empresas-ms...`);
 
-        const resultadoAdmin = await this.client.send('validar_user_admin', usua_admin_id).toPromise();
+      //   const resultadoAdmin = await this.client.send('validar_user_admin', usua_admin_id).toPromise();
 
-        if (!resultadoAdmin.valid) {
-          console.warn(`⚠️ Usuario admin ${usua_admin_id} no es válido o no es admin`);
-          throw new Error(`El usuario administrador no es válido o no tiene permisos de ADMIN`);
-        }
-      } else {
-        console.log(`ℹ️ No se recibió usuario admin en la actualización. Saltando validación de admin.`);
-      }
+      //   if (!resultadoAdmin.valid) {
+      //     console.warn(`⚠️ Usuario admin ${usua_admin_id} no es válido o no es admin`);
+      //     throw new Error(`El usuario administrador no es válido o no tiene permisos de ADMIN`);
+      //   }
+      // } else {
+      //   console.log(`ℹ️ No se recibió usuario admin en la actualización. Saltando validación de admin.`);
+      // }
 
       console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
       const user = await this.client.send({ cmd: 'findOne_users' }, {id: updatedBy }).toPromise();
@@ -174,14 +165,14 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
 
 
-  async obtenerEmpresasPorAdmin(usua_admin_id: number) {
-    return this.empresa.findMany({
-      where: {
-        usua_admin_id,
-        //activo: true,
-      },
-    });
-  }
+  // async obtenerEmpresasPorAdmin(usua_admin_id: number) {
+  //   return this.empresa.findMany({
+  //     where: {
+  //       usua_admin_id,
+  //       //activo: true,
+  //     },
+  //   });
+  // }
 
   async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{valido: boolean; motivo?: string}>{
     const empresa = await this.empresa.findUnique({
@@ -192,11 +183,28 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       return { valido: false, motivo: 'NO_EXISTE LA EMPRESA'};
     }
 
-    if (empresa.usua_admin_id !== usua_admin_id){
-      return { valido: false, motivo: 'NO_AUTORIZADO' };
-    }
+    // if (empresa.usua_admin_id !== usua_admin_id){
+    //   return { valido: false, motivo: 'NO_AUTORIZADO' };
+    // }
 
     return { valido: true };
   }
+
+  //***************************************************************** */
+  //empieza empresausuario
+  async asignarUsuarios(dto: CreateEmpresaUsuarioDto){
+    const { empresaId, usuarioIds } = dto;
+
+    const data = usuarioIds.map(usuarioId => ({
+      empresaId,
+      usuarioId,
+    }));
+
+    await this.empresaUsuario.createMany({data});
+
+    return { message: 'Usuarios asignados correctamente a la empresa.' };
+  }
+  //fin empresausuario
+
 
 }

@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsBoolean, IsDate, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateEmpresaDto {
@@ -29,8 +30,8 @@ export class CreateEmpresaDto {
     canton_id: number;
 
 
-    @IsInt()
-    usua_admin_id: number; // ID del usuario administrador
+    // @IsInt()
+    // usua_admin_id: number; // ID del usuario administrador
 
     @IsOptional()
     @IsInt()
@@ -47,5 +48,11 @@ export class CreateEmpresaDto {
 
     @IsOptional()
     @IsDate()
-    fecha_registro?: Date;
+    @Type(() => Date)
+    fecha_inicio: Date;
+
+    @IsOptional()
+    @IsDate()
+    @Type(() => Date)
+    fecha_fin: Date;
 }

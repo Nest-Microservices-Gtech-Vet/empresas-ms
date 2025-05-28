@@ -31,16 +31,19 @@ model Empresa {
 
 
 
-  usua_admin_id Int // ID del usuario (está en otro microservicio)
+  //usua_admin_id Int // ID del usuario (está en otro microservicio)
+  empresaUsuario EmpresaUsuario[]
 
   createdBy Int? // ID del superadmin (está en otro microservicio)
   updatedBy Int?
 
   activo         Boolean  @default(true)
-  fecha_registro DateTime @default(now())
+  fecha_inicio DateTime @default(now())
+  fecha_fin    DateTime
+
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
-  @@unique([usua_admin_id, emp_id])
+
 }
 
 model Provincia {
@@ -68,6 +71,14 @@ model Canton {
 
   createdBy Int? // ID del superadmin (está en otro microservicio)
   updatedBy Int?
+}
+
+model EmpresaUsuario {
+  id         Int      @id @default(autoincrement())
+  empresaId  Int
+  usuarioId  Int
+  empresa    Empresa  @relation(fields: [empresaId], references: [emp_id])
+  created_at DateTime @default(now())
 }
 
 

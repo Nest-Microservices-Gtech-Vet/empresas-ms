@@ -3,6 +3,7 @@ import { EmpresasService } from './empresas.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
 
 @Controller()
 export class EmpresasController {
@@ -76,19 +77,25 @@ export class EmpresasController {
 
   //****************************************** */
 
-  // inicio empresas administradas por el usuario admin
-  @MessagePattern('empresas.mis-empresas')
-  async obtenerEmpresasPorAdmin(@Payload() data: { user: { id: number } }) {
-    const { user } = data;
-    return this.empresasService.obtenerEmpresasPorAdmin(user.id);
-  }
-  // inicio empresas administradas por el usuario admin
+  // // inicio empresas administradas por el usuario admin
+  // @MessagePattern('empresas.mis-empresas')
+  // async obtenerEmpresasPorAdmin(@Payload() data: { user: { id: number } }) {
+  //   const { user } = data;
+  //   return this.empresasService.obtenerEmpresasPorAdmin(user.id);
+  // }
+  // // inicio empresas administradas por el usuario admin
 
   //****************************************** */
 
   @MessagePattern('empresas.validar-empresa-admin')
   async validarEmpresaDelAdmin(@Payload() data: { empresa_id: number; admin_id: number }) {
     return this.empresasService.validarEmpresaPorAdmin(data.empresa_id, data.admin_id);
+  }
+
+    //****************************************** *********************/
+  @MessagePattern({ cmd: 'asignar-usuarios-empresa'})
+  async asignarUsuarios(@Payload() dto: CreateEmpresaUsuarioDto){
+    return this.empresasService.asignarUsuarios(dto)
   }
 
 
