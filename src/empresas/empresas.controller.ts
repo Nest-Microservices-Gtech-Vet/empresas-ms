@@ -92,10 +92,16 @@ export class EmpresasController {
     return this.empresasService.validarEmpresaPorAdmin(data.empresa_id, data.admin_id);
   }
 
-    //****************************************** *********************/
-  @MessagePattern({ cmd: 'asignar-usuarios-empresa'})
-  async asignarUsuarios(@Payload() dto: CreateEmpresaUsuarioDto){
+  //****************************************** *********************/
+  @MessagePattern({ cmd: 'asignar-usuarios-empresa' })
+  async asignarUsuarios(@Payload() dto: CreateEmpresaUsuarioDto) {
     return this.empresasService.asignarUsuarios(dto)
+  }
+
+
+  @MessagePattern('empresas.findById')
+  async findById(@Payload() id: number) {
+    return this.empresasService.findByIdWithUsuarios(id);
   }
 
 

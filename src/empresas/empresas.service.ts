@@ -31,10 +31,10 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         emp_direccion: createEmpDto.emp_direccion,
         emp_telefono: createEmpDto.emp_telefono,
         emp_ruc: createEmpDto.emp_ruc,
-        emp_tipo_empresa:createEmpDto.emp_tipo_empresa,
+        emp_tipo_empresa: createEmpDto.emp_tipo_empresa,
         //usua_admin_id: createEmpDto.usua_admin_id,
         activo: createEmpDto.activo ?? true,
-        fecha_inicio:createEmpDto.fecha_inicio,
+        fecha_inicio: createEmpDto.fecha_inicio,
         fecha_fin: createEmpDto.fecha_fin,
         createdBy: createEmpDto.createdBy,
         updatedBy: createEmpDto.updatedBy,
@@ -44,7 +44,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         canton: {
           connect: { can_id: createEmpDto.canton_id }
         },
-       
+
       },
     });
     return empresa;
@@ -60,7 +60,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     }
   }
 
-   async findAllInactivas() {
+  async findAllInactivas() {
     const totalRegistros = await this.empresa.count({ where: { activo: false } })
     return {
       data: await this.empresa.findMany({
@@ -106,7 +106,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
       // }
 
       console.log(`🔍 Validando usuario que actualiza (ID: ${updatedBy}) en usuarios-ms...`);
-      const user = await this.client.send({ cmd: 'findOne_users' }, {id: updatedBy }).toPromise();
+      const user = await this.client.send({ cmd: 'findOne_users' }, { id: updatedBy }).toPromise();
       console.log('📦 Enviando a usuarios-ms:', { cmd: 'findOne_users' }, { id: updatedBy });
 
 
@@ -174,13 +174,13 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   //   });
   // }
 
-  async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{valido: boolean; motivo?: string}>{
+  async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{ valido: boolean; motivo?: string }> {
     const empresa = await this.empresa.findUnique({
-      where: {emp_id: empresa_id},
+      where: { emp_id: empresa_id },
     });
 
-    if (!empresa){
-      return { valido: false, motivo: 'NO_EXISTE LA EMPRESA'};
+    if (!empresa) {
+      return { valido: false, motivo: 'NO_EXISTE LA EMPRESA' };
     }
 
     // if (empresa.usua_admin_id !== usua_admin_id){
@@ -192,19 +192,38 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
   //***************************************************************** */
   //empieza empresausuario
-  async asignarUsuarios(dto: CreateEmpresaUsuarioDto){
-    const { empresaId, usuarioIds } = dto;
+  async asignarUsuarios(dto: CreateEmpresaUsuarioDto) {
+  const { empresaId, usuarioIds } = dto;
 
-    const data = usuarioIds.map(usuarioId => ({
-      empresaId,
-      usuarioId,
-    }));
+  // Eliminar los existentes para esa empresa
+  await this.empresaUsuario.deleteMany({
+    where: { empresaId },
+  });
 
-    await this.empresaUsuario.createMany({data});
+  // Insertar los nuevos
+  const data = usuarioIds.map((usuarioId) => ({
+    empresaId,
+    usuarioId,
+  }));
 
-    return { message: 'Usuarios asignados correctamente a la empresa.' };
-  }
+  await this.empresaUsuario.createMany({ data });
+
+  return { message: 'Usuarios asignados correctamente' };
+}
+
   //fin empresausuario
+
+
+  async findByIdWithUsuarios(id: number) {
+    const empresa = await this.empresa.findUnique({
+      where: { emp_id: id },
+      include: {
+        empresaUsuario: true, // trae usuarioIds
+      },
+    });
+
+    return empresa;
+  }
 
 
 }
