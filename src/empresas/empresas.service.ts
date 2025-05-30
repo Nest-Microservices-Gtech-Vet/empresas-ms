@@ -165,14 +165,20 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
 
 
 
-  // async obtenerEmpresasPorAdmin(usua_admin_id: number) {
-  //   return this.empresa.findMany({
-  //     where: {
-  //       usua_admin_id,
-  //       //activo: true,
-  //     },
-  //   });
-  // }
+  async findEmpresasByAdmin(usuarioId: number) {
+    return this.empresa.findMany({
+      where: {
+        empresaUsuario: {
+          some: {
+            usuarioId,
+          },
+        },
+      },
+      include: {
+        empresaUsuario: true,
+      },
+    });
+  }
 
   async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{ valido: boolean; motivo?: string }> {
     const empresa = await this.empresa.findUnique({
@@ -193,23 +199,23 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   //***************************************************************** */
   //empieza empresausuario
   async asignarUsuarios(dto: CreateEmpresaUsuarioDto) {
-  const { empresaId, usuarioIds } = dto;
+    const { empresaId, usuarioIds } = dto;
 
-  // Eliminar los existentes para esa empresa
-  await this.empresaUsuario.deleteMany({
-    where: { empresaId },
-  });
+    // Eliminar los existentes para esa empresa
+    await this.empresaUsuario.deleteMany({
+      where: { empresaId },
+    });
 
-  // Insertar los nuevos
-  const data = usuarioIds.map((usuarioId) => ({
-    empresaId,
-    usuarioId,
-  }));
+    // Insertar los nuevos
+    const data = usuarioIds.map((usuarioId) => ({
+      empresaId,
+      usuarioId,
+    }));
 
-  await this.empresaUsuario.createMany({ data });
+    await this.empresaUsuario.createMany({ data });
 
-  return { message: 'Usuarios asignados correctamente' };
-}
+    return { message: 'Usuarios asignados correctamente' };
+  }
 
   //fin empresausuario
 
@@ -223,6 +229,23 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     });
 
     return empresa;
+  }
+
+
+  async obtenerPorUsuario(usuarioId: number) {
+    const relaciones = await this.empresaUsuario.findMany({
+      where: { usuarioId },
+      include: {
+        empresa: {
+          select: {
+            emp_id: true,
+            emp_nombre: true,
+          },
+        },
+      },
+    });
+
+    return relaciones.map(rel => rel.empresa);
   }
 
 

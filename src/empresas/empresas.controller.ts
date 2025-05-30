@@ -20,13 +20,13 @@ export class EmpresasController {
 
   //****************************************** */
 
-  //inicio obtener empresa
+  //inicio obtener empresaS
   @MessagePattern({ cmd: 'findAll_empresas' })
   findAll(@Payload() payload: any) {
     //console.log('Payload recibido:', payload); 
     return this.empresasService.findAll();
   }
-  //fin obtener empresa
+  //fin obtener empresaS
 
   //****************************************** */
 
@@ -36,7 +36,7 @@ export class EmpresasController {
     //console.log('Payload recibido:', payload); 
     return this.empresasService.findAllInactivas();
   }
-  //fin obtener empresa
+  //fin obtener empresa inactivas
 
   //****************************************** */
 
@@ -77,13 +77,13 @@ export class EmpresasController {
 
   //****************************************** */
 
-  // // inicio empresas administradas por el usuario admin
-  // @MessagePattern('empresas.mis-empresas')
-  // async obtenerEmpresasPorAdmin(@Payload() data: { user: { id: number } }) {
-  //   const { user } = data;
-  //   return this.empresasService.obtenerEmpresasPorAdmin(user.id);
-  // }
-  // // inicio empresas administradas por el usuario admin
+  // inicio empresas administradas por el usuario admin
+  @MessagePattern('empresas.mis-empresas')
+  async obtenerEmpresasPorAdmin(@Payload() data: { user: { id: number } }) {
+    const { user } = data;
+    return this.empresasService.findEmpresasByAdmin(user.id);
+  }
+  // inicio empresas administradas por el usuario admin
 
   //****************************************** */
 
@@ -102,6 +102,13 @@ export class EmpresasController {
   @MessagePattern('empresas.findById')
   async findById(@Payload() id: number) {
     return this.empresasService.findByIdWithUsuarios(id);
+  }
+
+
+  @MessagePattern('empresas.obtenerPorUsuario')
+  async obtenerEmpresasPorUsuario(@Payload() usuarioId: number) {
+    const empresas = await this.empresasService.obtenerPorUsuario(usuarioId);
+    return empresas;
   }
 
 
