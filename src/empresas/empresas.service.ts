@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class EmpresasService extends PrismaClient implements OnModuleInit {
@@ -50,24 +51,82 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     return empresa;
   }
 
-  async findAll() {
-    const totalRegistros = await this.empresa.count({ where: { activo: true } })
-    return {
-      data: await this.empresa.findMany({
-        where: { activo: true }
-      }),
-      metadata: { Total_Registros: totalRegistros }
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 50, search = '' } = paginationDto;
+
+    const where: any = {
+      activo: true,
+    };
+
+    if (search) {
+      where.OR = [
+        { emp_nombre: { contains: search, mode: 'insensitive' } },
+        { emp_ruc: { contains: search, mode: 'insensitive' } },
+        { emp_correo: { contains: search, mode: 'insensitive' } },
+      ];
     }
+
+    const [total, data] = await Promise.all([
+      this.empresa.count({ where }),
+      this.empresa.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        where,
+        orderBy: {
+          emp_nombre: 'asc',
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      metadata: {
+        total,
+        page,
+        lastPage,
+      },
+    };
   }
 
-  async findAllInactivas() {
-    const totalRegistros = await this.empresa.count({ where: { activo: false } })
-    return {
-      data: await this.empresa.findMany({
-        where: { activo: false }
-      }),
-      metadata: { Total_Registros: totalRegistros }
+  async findAllInactivas(paginationDto: PaginationDto) {
+    const { page = 1, limit = 50, search = '' } = paginationDto;
+
+    const where: any = {
+      activo: false,
+    };
+
+    if (search) {
+      where.OR = [
+        { emp_nombre: { contains: search, mode: 'insensitive' } },
+        { emp_ruc: { contains: search, mode: 'insensitive' } },
+        { emp_correo: { contains: search, mode: 'insensitive' } },
+      ];
     }
+
+    const [total, data] = await Promise.all([
+      this.empresa.count({ where }),
+      this.empresa.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        where,
+        orderBy: {
+          emp_nombre: 'asc',
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+
+    return {
+      data,
+      metadata: {
+        total,
+        page,
+        lastPage,
+      },
+    };
   }
 
   async findOne(emp_id: number) {

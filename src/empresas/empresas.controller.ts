@@ -4,6 +4,7 @@ import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller()
 export class EmpresasController {
@@ -22,9 +23,9 @@ export class EmpresasController {
 
   //inicio obtener empresaS
   @MessagePattern({ cmd: 'findAll_empresas' })
-  findAll(@Payload() payload: any) {
+  findAll(@Payload() payload:{paginationDto: PaginationDto; }) {
     //console.log('Payload recibido:', payload); 
-    return this.empresasService.findAll();
+    return this.empresasService.findAll(payload.paginationDto);
   }
   //fin obtener empresaS
 
@@ -32,9 +33,9 @@ export class EmpresasController {
 
   //inicio obtener empresa inactivas
   @MessagePattern({ cmd: 'findAll_empresas.inac' })
-  findAllInac(@Payload() payload: any) {
+  findAllInac(@Payload() payload:{paginationDto: PaginationDto; }) {
     //console.log('Payload recibido:', payload); 
-    return this.empresasService.findAllInactivas();
+    return this.empresasService.findAllInactivas(payload.paginationDto);
   }
   //fin obtener empresa inactivas
 
