@@ -18,8 +18,8 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
 
-  onModuleInit() {
-    this.$connect
+  async onModuleInit() {
+    await this.$connect
     this.logger.log('Empresas Conectado')
   }
 
@@ -239,21 +239,35 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     });
   }
 
-  async validarEmpresaPorAdmin(empresa_id: number, usua_admin_id: number): Promise<{ valido: boolean; motivo?: string }> {
+  async validarEmpresaPorAdmin(empresa_id: number, admin_id: number): Promise<{ valido: boolean; motivo?: string }> {
+    if (!empresa_id) {
+      return { valido: false, motivo: 'ID_EMPRESA_INVALIDO' };
+    }
+
     const empresa = await this.empresa.findUnique({
       where: { emp_id: empresa_id },
     });
 
     if (!empresa) {
-      return { valido: false, motivo: 'NO_EXISTE LA EMPRESA' };
+      return { valido: false, motivo: 'NO_EXISTE_LA_EMPRESA' };
     }
 
-    // if (empresa.usua_admin_id !== usua_admin_id){
-    //   return { valido: false, motivo: 'NO_AUTORIZADO' };
-    // }
+    // TODO: verificar si el admin realmente está asignado
+    const relacion = await this.empresaUsuario.findFirst({
+      where: {
+        empresaId: empresa_id,
+        usuarioId: admin_id,
+      },
+    });
+
+    if (!relacion) {
+      return { valido: false, motivo: 'NO_AUTORIZADO' };
+    }
 
     return { valido: true };
   }
+  
+
 
   //***************************************************************** */
   //empieza empresausuario
