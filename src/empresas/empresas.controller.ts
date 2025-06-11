@@ -23,7 +23,7 @@ export class EmpresasController {
 
   //inicio obtener empresaS
   @MessagePattern({ cmd: 'findAll_empresas' })
-  findAll(@Payload() payload:{paginationDto: PaginationDto; }) {
+  findAll(@Payload() payload: { paginationDto: PaginationDto; }) {
     //console.log('Payload recibido:', payload); 
     return this.empresasService.findAll(payload.paginationDto);
   }
@@ -33,7 +33,7 @@ export class EmpresasController {
 
   //inicio obtener empresa inactivas
   @MessagePattern({ cmd: 'findAll_empresas.inac' })
-  findAllInac(@Payload() payload:{paginationDto: PaginationDto; }) {
+  findAllInac(@Payload() payload: { paginationDto: PaginationDto; }) {
     //console.log('Payload recibido:', payload); 
     return this.empresasService.findAllInactivas(payload.paginationDto);
   }
@@ -112,5 +112,10 @@ export class EmpresasController {
     return empresas;
   }
 
+
+  @MessagePattern('empresas.obtener-empresas-por-admin')
+  async listarEmpresasPorAdmin(@Payload() data: { admin_id: number }) {
+    return this.empresasService.listarEmpresasDeAdmin(data.admin_id);
+  }
 
 }

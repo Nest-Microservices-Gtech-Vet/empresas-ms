@@ -322,4 +322,20 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
   }
 
 
+  async listarEmpresasDeAdmin(admin_id: number) {
+  return this.empresa.findMany({
+    where: {
+      empresaUsuario: {
+        some: { usuarioId: admin_id },
+      },
+    },
+    select: {
+      emp_id: true,
+      emp_nombre: true,
+    },
+  });
+}
+
+
+
 }
