@@ -245,7 +245,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     }
 
     const empresa = await this.empresa.findUnique({
-      where: { emp_id: empresa_id },
+      where: { emp_id: Number(empresa_id) },
     });
 
     if (!empresa) {
@@ -255,7 +255,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     // TODO: verificar si el admin realmente está asignado
     const relacion = await this.empresaUsuario.findFirst({
       where: {
-        empresaId: empresa_id,
+        empresaId: Number(empresa_id),
         usuarioId: admin_id,
       },
     });
