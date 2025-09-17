@@ -7,7 +7,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 @Controller('cantones')
 export class CantonesController {
   constructor(private readonly cantonesService: CantonesService) {}
-
+//cantones crear
   @MessagePattern({ cmd: 'create_cant'})
   createCan(@Payload() createCantonDto: CreateCantonDto){
     return this.cantonesService.create(createCantonDto)
