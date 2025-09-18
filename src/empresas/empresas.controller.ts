@@ -11,11 +11,15 @@ export class EmpresasController {
   constructor(private readonly empresasService: EmpresasService) { }
 
   //inicio crear empresa
-  @MessagePattern({ cmd: 'create_empresa' })
-  createEmp(@Payload() createEmpresaDto: CreateEmpresaDto) {
+@MessagePattern({ cmd: 'create_empresa' })
+  createEmp(@Payload() payload: {createEmpresaDto: CreateEmpresaDto; user:{id:number}}) {
+    const { createEmpresaDto,user} = payload
     console.log('📩 Recibido en create_empresa:', createEmpresaDto);
 
-    return this.empresasService.create(createEmpresaDto);
+    return this.empresasService.create({
+      ...createEmpresaDto,
+      createdBy: user.id,
+    },user);
   }
   //fin crear empresa
 

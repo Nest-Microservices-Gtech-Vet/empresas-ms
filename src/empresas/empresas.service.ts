@@ -23,7 +23,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     this.logger.log('Empresas Conectado')
   }
 
-  async create(createEmpDto: CreateEmpresaDto) {
+  async create(createEmpDto: CreateEmpresaDto, user: { id: number }) {
 
     const empresa = await this.empresa.create({
       data: {
@@ -33,6 +33,7 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
         emp_telefono: createEmpDto.emp_telefono,
         emp_ruc: createEmpDto.emp_ruc,
         emp_tipo_empresa: createEmpDto.emp_tipo_empresa,
+        emp_foto:createEmpDto.emp_foto,
         //usua_admin_id: createEmpDto.usua_admin_id,
         activo: createEmpDto.activo ?? true,
         fecha_inicio: createEmpDto.fecha_inicio,
