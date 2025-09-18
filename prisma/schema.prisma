@@ -21,6 +21,7 @@ model Empresa {
   emp_telefono  String @db.VarChar(10)
   emp_ruc       String @unique @db.VarChar(13)
   emp_tipo_empresa String @db.VarChar(255)
+  emp_foto  String? @db.VarChar(255)
 
 
   provincia_id Int?
