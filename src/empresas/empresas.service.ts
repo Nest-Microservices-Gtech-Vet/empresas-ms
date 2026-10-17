@@ -52,6 +52,15 @@ export class EmpresasService extends PrismaClient implements OnModuleInit {
     return empresa;
   }
 
+  async findTiposEmpresa() {
+    const tipos = await this.empresa.findMany({
+      distinct: ['emp_tipo_empresa'],
+      select: { emp_tipo_empresa: true },
+      orderBy: { emp_tipo_empresa: 'asc' },
+    });
+    return tipos.map((t) => t.emp_tipo_empresa);
+  }
+
   async findAll(paginationDto: PaginationDto) {
     const { page = 1, limit = 50, search = '' } = paginationDto;
 

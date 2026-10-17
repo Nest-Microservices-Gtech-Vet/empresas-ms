@@ -25,6 +25,15 @@ export class EmpresasController {
 
   //****************************************** */
 
+  //inicio obtener tipos de empresa (los ya usados por las empresas registradas)
+  @MessagePattern({ cmd: 'get_tipoEmp' })
+  getTiposEmpresa() {
+    return this.empresasService.findTiposEmpresa();
+  }
+  //fin obtener tipos de empresa
+
+  //****************************************** */
+
   //inicio obtener empresaS
   @MessagePattern({ cmd: 'findAll_empresas' })
   findAll(@Payload() payload: { paginationDto: PaginationDto; }) {
